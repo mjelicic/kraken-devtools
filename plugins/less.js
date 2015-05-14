@@ -20,31 +20,18 @@
 
 var lib = require('less');
 
-
 module.exports = function (options) {
 
     options.ext = options.ext || 'less';
 
     return function (data, args, callback) {
-        var parser = new(lib.Parser)({
+        lib.render(data.toString('utf8'), {
             paths: args.paths,
             filename: args.context.name,
             dumpLineNumbers: 'comments'
+        }, function (err, output) {
+            if (err) { return callback(err); }
+            callback(null, output.css);
         });
-
-        try {
-            // Really? REALLY?! It takes an error-handling callback but still can throw errors?
-            parser.parse(data.toString('utf8'), function (err, tree) {
-                if (err) {
-                    callback(err);
-                    return;
-                }
-                callback(null, tree.toCSS());
-            });
-
-        } catch (err) {
-            callback(err);
-        }
     };
-
 };
